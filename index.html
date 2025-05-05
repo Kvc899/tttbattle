@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe Battle</title>
+    <!-- Google Font for a playful look -->
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icon support -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" 
+          integrity="sha512-K5xaVi7sl995VMGZuXvKGPsNaAHH3TcQnUvG/wHYQT2Xb7/ZobymCZkVMDjyNeK8jQWsE57gx+4oPOh57YxCew==" 
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: 'Bungee', cursive;
+            background: blue;
+            color: #fff;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            transition: background 0.3s, color 0.3s;
+        }
+        /* Trophy Counter (persistent across views) */
+        .trophyCount {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            background: rgba(255,255,255,0.8);
+            color: #000;
+            padding: 5px 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        /* Home Button */
+        #homeBtn {
+            position: fixed;
+            top: 50px;
+            right: 10px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #homeBtn:hover {
+            background-color: #0056b3;
+        }
+        /* Theme Switcher Toggle Button */
+        #toggleThemeBtn {
+            position: fixed;
+            top: 90px;
+            right: 10px;
+            font-size: 16px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #toggleThemeBtn:hover {
+            background-color: #218838;
+        }
+        /* Theme Switcher Panel */
+        #themeSwitcherContainer {
+            position: fixed;
+            top: 130px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+            z-index: 1000;
+        }
+        #themeSwitcherContainer button {
+            margin: 5px;
+            padding: 5px 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #darkThemeBtn {
+            background-color: #333;
+            color: #fff;
+        }
+        #darkThemeBtn:hover {
+            background-color: #222;
+        }
+        #lightThemeBtn {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        #lightThemeBtn:hover {
+            background-color: #ddd;
+        }
+        #colorGrid {
+            margin-top: 10px;
+            display: grid;
+            grid-template-columns: repeat(5, 30px);
+            gap: 5px;
+            justify-content: center;
+        }
+        .colorSwatch {
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        /* Close Button inside Theme Panel */
+        #closeThemeBtn {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        #closeThemeBtn:hover {
+            background-color: #c82333;
+        }
+        /* Welcome Screen */
+        .Welcome {
+            background: rgba(0,0,0,0.5);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 40px auto;
+            max-width: 500px;
+        }
+        .BSGame button, #welcomeBtn {
+            background-color: #007bff;
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .BSGame button:hover, #welcomeBtn:hover {
+            background-color: #0056b3;
+        }
+        /* Game UI */
+        #gameContainer {
+            display: none;
+        }
+        #board {
+            max-width: 300px;
+            margin: 20px auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+        }
+        .cell {
+            width: 90px;
+            height: 90px;
+            background: #fff;
+            color: #000;
+            border: 3px solid #333;
+            font-size: 2rem;
+            line-height: 90px;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+        #message {
+            font-size: 1.4rem;
+            margin-top: 20px;
+            text-shadow: 1px 1px #000;
+        }
+        button.restart {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #fff;
+            transition: background-color 0.3s;
+        }
+        button.restart:hover {
+            background-color: #0056b3;
+        }
+        footer {
+            margin-top: 40px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <!-- Trophy counter (only visible here) -->
+    <div class="trophyCount">
+        <i class="fa-solid fa-trophy"></i> <span id="trophyNumber">0</span>
+    </div>
+    <!-- Home Button -->
+    <button id="homeBtn" style="display:none;">Home</button>
+    <!-- Theme Toggle Button -->
+    <button id="toggleThemeBtn">Theme</button>
+    <!-- Theme Switcher Panel -->
+    <div id="themeSwitcherContainer">
+        <button id="darkThemeBtn">Dark</button>
+        <button id="lightThemeBtn">Light</button>
+        <div id="colorGrid">
+            <button class="colorSwatch" data-color="#0000ff" style="background:#0000ff;"></button>
+            <button class="colorSwatch" data-color="#ff0000" style="background:#ff0000;"></button>
+            <button class="colorSwatch" data-color="#00ff00" style="background:#00ff00;"></button>
+            <button class="colorSwatch" data-color="#ff7eb3" style="background:#ff7eb3;"></button>
+            <button class="colorSwatch" data-color="#ff758c" style="background:#ff758c;"></button>
+            <button class="colorSwatch" data-color="#007bff" style="background:#007bff;"></button>
+            <button class="colorSwatch" data-color="#28a745" style="background:#28a745;"></button>
+            <button class="colorSwatch" data-color="#6f42c1" style="background:#6f42c1;"></button>
+            <button class="colorSwatch" data-color="#f0ad4e" style="background:#f0ad4e;"></button>
+            <button class="colorSwatch" data-color="#343a40" style="background:#343a40;"></button>
+        </div>
+        <button id="closeThemeBtn">Close</button>
+    </div>
+
+    <!-- Welcome Screen -->
+    <div id="welcomeScreen" class="Welcome">
+        <h1>Tic Tac Toe Battle</h1>
+        <p>Welcome, choose your challenge below:</p>
+        <button id="welcomeBtn">Start Game</button>
+    </div>
+
+    <!-- Game Container -->
+    <div id="gameContainer">
+        <h1>Tic Tac Toe</h1>
+        <div id="board"></div>
+        <div id="message"></div>
+        <button class="restart" style="display:none;" onclick="startGame()">Play Again</button>
+    </div>
+
+    <footer>
+        &copy; Karsten Cronin, Saudi Arabia
+    </footer>
+
+    <script>
+        // Initialize trophy count and theme on page load
+        document.addEventListener("DOMContentLoaded", function() {
+            const trophyCount = localStorage.getItem("trophies") || "0";
+            document.getElementById("trophyNumber").textContent = trophyCount;
+            applySavedTheme();
+        });
+        
+        // Theme switcher functionality
+        const darkThemeBtn = document.getElementById("darkThemeBtn");
+        const lightThemeBtn = document.getElementById("lightThemeBtn");
+        const colorSwatches = document.querySelectorAll(".colorSwatch");
+        const themeSwitcherContainer = document.getElementById("themeSwitcherContainer");
+        const toggleThemeBtn = document.getElementById("toggleThemeBtn");
+        const closeThemeBtn = document.getElementById("closeThemeBtn");
+
+        // Toggle the theme panel open/close
+        toggleThemeBtn.addEventListener("click", function() {
+            themeSwitcherContainer.style.display = "block";
+        });
+        closeThemeBtn.addEventListener("click", function() {
+            themeSwitcherContainer.style.display = "none";
+        });
+        
+        darkThemeBtn.addEventListener("click", function() {
+            document.body.style.background = "#333";
+            document.body.style.color = "#fff";
+            localStorage.setItem("theme", JSON.stringify({mode:"dark"}));
+        });
+        
+        lightThemeBtn.addEventListener("click", function() {
+            document.body.style.background = "#f0f0f0";
+            document.body.style.color = "#333";
+            localStorage.setItem("theme", JSON.stringify({mode:"light"}));
+        });
+        
+        colorSwatches.forEach(swatch => {
+            swatch.addEventListener("click", function() {
+                const color = this.getAttribute("data-color");
+                document.body.style.background = color;
+                localStorage.setItem("customBackground", color);
+            });
+        });
+        
+        function applySavedTheme() {
+            const savedTheme = localStorage.getItem("theme");
+            const customBackground = localStorage.getItem("customBackground");
+            if (customBackground) {
+                document.body.style.background = customBackground;
+            } else if (savedTheme) {
+                const theme = JSON.parse(savedTheme);
+                if (theme.mode === "dark") {
+                    document.body.style.background = "#333";
+                    document.body.style.color = "#fff";
+                } else if (theme.mode === "light") {
+                    document.body.style.background = "#f0f0f0";
+                    document.body.style.color = "#333";
+                }
+            }
+        }
+        
+        // Global variables for the game
+        let board = ["", "", "", "", "", "", "", "", ""];
+        let human = "X";
+        let computer = "O";
+        let gameOver = false;
+        let gameCount = parseInt(localStorage.getItem("gameCount") || "0");
+
+        const boardEl = document.getElementById("board");
+        const messageEl = document.getElementById("message");
+        const restartBtn = document.querySelector("button.restart");
+        const welcomeScreen = document.getElementById("welcomeScreen");
+        const gameContainer = document.getElementById("gameContainer");
+        const homeBtn = document.getElementById("homeBtn");
+
+        // Show game view and initialize game
+        document.getElementById("welcomeBtn").addEventListener("click", function() {
+            welcomeScreen.style.display = "none";
+            gameContainer.style.display = "block";
+            homeBtn.style.display = "block";
+            startGame();
+        });
+        
+        // Home button: return to welcome screen
+        homeBtn.addEventListener("click", function() {
+            welcomeScreen.style.display = "block";
+            gameContainer.style.display = "none";
+            homeBtn.style.display = "none";
+        });
+        
+        function startGame() {
+            board = ["", "", "", "", "", "", "", "", ""];
+            gameOver = false;
+            messageEl.textContent = "Your turn!";
+            restartBtn.style.display = "none";
+            gameCount++;
+            localStorage.setItem("gameCount", gameCount);
+            renderBoard();
+        }
+        
+        function renderBoard() {
+            boardEl.innerHTML = "";
+            board.forEach((cell, index) => {
+                const cellEl = document.createElement("div");
+                cellEl.className = "cell";
+                cellEl.textContent = cell;
+                cellEl.addEventListener("click", () => handleHumanMove(index));
+                boardEl.appendChild(cellEl);
+            });
+        }
+        
+        function handleHumanMove(index) {
+            if (board[index] === "" && !gameOver) {
+                board[index] = human;
+                renderBoard();
+                if (checkWinner(board, human)) {
+                    endGame("win");
+                } else if (isTie()) {
+                    endGame("tie");
+                } else {
+                    messageEl.textContent = "Computer's turn...";
+                    setTimeout(computerMove, 500);
+                }
+            }
+        }
+        
+        function computerMove() {
+            if (gameOver) return;
+            let move;
+            if (gameCount <= 3) {
+                const available = board.map((v, i) => v === "" ? i : null).filter(v => v !== null);
+                move = available[Math.floor(Math.random() * available.length)];
+            } else {
+                move = minimax(board, computer).index;
+            }
+            board[move] = computer;
+            renderBoard();
+            if (checkWinner(board, computer)) {
+                endGame("lose");
+            } else if (isTie()) {
+                endGame("tie");
+            } else {
+                messageEl.textContent = "Your turn!";
+            }
+        }
+        
+        function checkWinner(b, player) {
+            const wins = [
+                [0,1,2], [3,4,5], [6,7,8],
+                [0,3,6], [1,4,7], [2,5,8],
+                [0,4,8], [2,4,6]
+            ];
+            for (let combo of wins) {
+                if (b[combo[0]] === player && b[combo[1]] === player && b[combo[2]] === player) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        function isTie() {
+            return board.every(cell => cell !== "");
+        }
+        
+        function endGame(result) {
+            gameOver = true;
+            if (result === "win") {
+                messageEl.textContent = "You win! 10 trophies awarded.";
+                updateTrophies(10);
+            } else if (result === "lose") {
+                messageEl.textContent = "You lose! 1 trophy deducted.";
+                updateTrophies(-1);
+            } else {
+                messageEl.textContent = "It's a tie!";
+            }
+            restartBtn.style.display = "block";
+        }
+        
+        function updateTrophies(amount) {
+            let current = parseInt(localStorage.getItem("trophies") || "0");
+            current += amount;
+            if (current < 0) current = 0;
+            localStorage.setItem("trophies", current.toString());
+            document.getElementById("trophyNumber").textContent = current;
+        }
+        
+        function minimax(newBoard, player) {
+            const availSpots = newBoard.map((v, i) => v === "" ? i : null).filter(v => v !== null);
+            if (checkWinner(newBoard, human)) {
+                return { score: -10 };
+            } else if (checkWinner(newBoard, computer)) {
+                return { score: 10 };
+            } else if (availSpots.length === 0) {
+                return { score: 0 };
+            }
+            
+            let moves = [];
+            for (let i = 0; i < availSpots.length; i++) {
+                let move = {};
+                move.index = availSpots[i];
+                newBoard[availSpots[i]] = player;
+                if (player === computer) {
+                    let result = minimax(newBoard, human);
+                    move.score = result.score;
+                } else {
+                    let result = minimax(newBoard, computer);
+                    move.score = result.score;
+                }
+                newBoard[availSpots[i]] = "";
+                moves.push(move);
+            }
+            
+            let bestMove;
+            if (player === computer) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < moves.length; i++) {
+                    if (moves[i].score > bestScore) {
+                        bestScore = moves[i].score;
+                        bestMove = i;
+                    }
+                }
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < moves.length; i++) {
+                    if (moves[i].score < bestScore) {
+                        bestScore = moves[i].score;
+                        bestMove = i;
+                    }
+                }
+            }
+            return moves[bestMove];
+        }
+    </script>
+</body>
+</html>
